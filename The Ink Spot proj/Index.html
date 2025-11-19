@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - The Ink Spot</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Header & Navigation */
+        header {
+            background-color: #1a5276;
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        nav a:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        header img {
+            display: block;
+            margin: 0 auto;
+            max-width: 200px;
+            height: auto;
+        }
+        
+        /* Section Styling */
+        section {
+            padding: 4rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #1a5276;
+        }
+        
+        .section-title p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* About Section */
+        .about-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .about-text {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .about-text h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #1a5276;
+        }
+        
+        .about-text p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .about-img {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .about-img img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* Services Section */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .service-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .service-content {
+            padding: 1.5rem;
+        }
+        
+        .service-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1a5276;
+        }
+        
+        /* Accordion Styles */
+        .accordion {
+            margin-top: 2rem;
+        }
+        
+        .accordion-item {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .accordion-header {
+            background-color: #f5f5f5;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        
+        .accordion-header:hover {
+            background-color: #e9e9e9;
+        }
+        
+        .accordion-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .accordion-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s;
+        }
+        
+        .accordion-item.active .accordion-content {
+            padding: 20px;
+            max-height: 500px;
+        }
+        
+        .accordion-icon {
+            transition: transform 0.3s;
+        }
+        
+        .accordion-item.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* Tabs Styles */
+        .tabs {
+            margin-top: 2rem;
+        }
+        
+        .tab-headers {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-header {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-header.active {
+            border-bottom: 3px solid #1a5276;
+            color: #1a5276;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            padding: 20px;
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Gallery Styles */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 2rem;
+        }
+        
+        .gallery-item {
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        /* Lightbox Styles */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .lightbox.active {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+        
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .lightbox-content img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .lightbox-close:hover {
+            color: #ccc;
+        }
+        
+        /* Map Styles */
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* Search Styles */
+        .search-container {
+            margin: 2rem 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .search-box {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .search-box:focus {
+            border-color: #1a5276;
+            box-shadow: 0 0 0 3px rgba(26, 82, 118, 0.2);
+        }
+        
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 2rem;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .product-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .product-content {
+            padding: 1.5rem;
+        }
+        
+        .product-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #1a5276;
+        }
+        
+        .product-content p {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        
+        /* Animation Classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #1a5276;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .footer-section p, .footer-section a {
+            color: #ddd;
+            margin-bottom: 0.5rem;
+            display: block;
+            text-decoration: none;
+        }
+        
+        .footer-section a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+        
+        .copyright {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            
+            .about-content {
+                flex-direction: column;
+            }
+            
+            .tab-headers {
+                flex-direction: column;
+            }
+            
+            .tab-header {
+                border-bottom: none;
+                border-left: 3px solid transparent;
+            }
+            
+            .tab-header.active {
+                border-left: 3px solid #1a5276;
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!--Navigation-->
+    <header>
+        <nav>
+            <a href="Index.html">Home</a>
+            <a href="./pages/contact.html">Contact Us</a>
+            <a href="./pages/product.html">Products</a>
+        </nav>
+        <img src="the ink spot.jpg" alt="The Ink Spot Logo">
+    </header>
+    
+    <div class="container">
+        <p>info</p><br>
+        <h1>The Ink Spot</h1><br>
+        <!--Inserting a hyperlink-->
+        <a href="" target="-blank">The Ink Spot</a>
+        
+        <!-- Search Functionality -->
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="Search our services and products...">
+        </div>
+        
+        <!-- About Section -->
+        <section id="about" class="about">
+            <div class="container">
+                <div class="section-title">
+                    <h2>About The Ink Spot</h2>
+                    <p>Your trusted printing partner in Turfloop Polokwane</p>
+                </div>
+                <div class="about-content">
+                    <div class="about-text">
+                        <h3>Our Story</h3>
+                        <p>The Ink Spot Printing and Ads was established by passionate professionals with over 4 years of experience in the printing industry. Based in the Turfloop Mankweng Polokwane shopping complex, we serve the entire worldwide.</p>
+                        <p>We recognized a tremendous opportunity in Turfloop to provide specialized and personalized copying and printing services that meet the unique that lure our customers and needs of our community.</p>
+                        <p>Our vision is to provide excellent client care, quality service and customer support while impacting the economy of South Africa through job opportunities and people empowerment.</p>
+                        <p>What sets us apart is our commitment to customer excellence, excellent customer relations, and fast service delivery.</p>
+                        
+                        <!-- Accordion -->
+                        <div class="accordion">
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <h3>Our Mission</h3>
+                                    <span class="accordion-icon">▼</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <p>To provide high-quality printing services with exceptional customer care, fast delivery, and innovative solutions that meet the diverse needs of our community.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <h3>Our Values</h3>
+                                    <span class="accordion-icon">▼</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <p>Quality, Customer Satisfaction, Innovation, Community Empowerment, and Professional Excellence.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <h3>Why Choose Us</h3>
+                                    <span class="accordion-icon">▼</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <p>With over 4 years of experience, state-of-the-art equipment, and a commitment to excellence, we deliver printing solutions that exceed expectations.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="about-img">
+                        <img src="https://placehold.co/600x400/1a5276/FFFFFF?text=Our+Printing+Studio" alt="Ink Spot Printing Studio">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Services Section -->
+        <section id="services" class="services">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Our Services</h2>
+                    <p>We offer a wide range of printing and advertising solutions to meet all your needs</p>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="tabs">
+                    <div class="tab-headers">
+                        <div class="tab-header active" data-tab="general">General Printing</div>
+                        <div class="tab-header" data-tab="large-format">Large Format</div>
+                        <div class="tab-header" data-tab="advertising">Advertising</div>
+                        <div class="tab-header" data-tab="graduation">Graduation Packages</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="general-tab">
+                        <h3>General Printing Services</h3>
+                        <p>We provide high-quality digital printing for all your business and personal needs:</p>
+                        <ul>
+                            <li>Business cards, letterheads, and envelopes</li>
+                            <li>Brochures, flyers, and pamphlets</li>
+                            <li>Reports, presentations, and documents</li>
+                            <li>Invitations, greeting cards, and stationery</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tab-content" id="large-format-tab">
+                        <h3>Large Format Printing</h3>
+                        <p>Make a big impression with our large format printing services:</p>
+                        <ul>
+                            <li>Banners and posters for events and promotions</li>
+                            <li>Signage for businesses and offices</li>
+                            <li>Vehicle graphics and wraps</li>
+                            <li>Window graphics and displays</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tab-content" id="advertising-tab">
+                        <h3>Advertising Solutions</h3>
+                        <p>Complete advertising packages to help your business stand out:</p>
+                        <ul>
+                            <li>Brand development and identity packages</li>
+                            <li>Marketing material design and printing</li>
+                            <li>Promotional products and giveaways</li>
+                            <li>Digital marketing support materials</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tab-content" id="graduation-tab">
+                        <h3>Graduation Packages</h3>
+                        <p>Celebrate your academic achievements with our special graduation packages:</p>
+                        <ul>
+                            <li>Complete certificate sets</li>
+                            <li>A3 and A4 calendars</li>
+                            <li>6x8 class photos</li>
+                            <li>Small key holders and frames</li>
+                            <li>Custom graduation announcements</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Services Grid -->
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-img" style="background-image: url('https://placehold.co/600x400/1a5276/FFFFFF?text=Printing+Services');"></div>
+                        <div class="service-content">
+                            <h3>General Printing</h3>
+                            <p>High-quality digital printing for all your business and personal needs. From documents to marketing materials.</p>
+                        </div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-img" style="background-image: url('https://placehold.co/600x400/e74c3c/FFFFFF?text=Large+Format+Printing');"></div>
+                        <div class="service-content">
+                            <h3>Large Format Printing</h3>
+                            <p>Banners, posters, and signage for businesses, events, and promotions. Make a big impression!</p>
+                        </div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-img" style="background-image: url('https://placehold.co/600x400/f39c12/FFFFFF?text=Advertising+Solutions');"></div>
+                        <div class="service-content">
+                            <h3>Advertising Solutions</h3>
+                            <p>Complete advertising packages to help your business stand out in the competitive market.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Gallery Section -->
+        <section id="gallery" class="gallery-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Our Work</h2>
+                    <p>Take a look at some of our recent projects and printing samples</p>
+                </div>
+                
+                <div class="gallery">
+                    <div class="gallery-item" data-src="https://placehold.co/800x600/1a5276/FFFFFF?text=Printing+Sample+1">
+                        <img src="https://placehold.co/400x300/1a5276/FFFFFF?text=Printing+Sample+1" alt="Printing Sample 1">
+                    </div>
+                    <div class="gallery-item" data-src="https://placehold.co/800x600/e74c3c/FFFFFF?text=Printing+Sample+2">
+                        <img src="https://placehold.co/400x300/e74c3c/FFFFFF?text=Printing+Sample+2" alt="Printing Sample 2">
+                    </div>
+                    <div class="gallery-item" data-src="https://placehold.co/800x600/f39c12/FFFFFF?text=Printing+Sample+3">
+                        <img src="https://placehold.co/400x300/f39c12/FFFFFF?text=Printing+Sample+3" alt="Printing Sample 3">
+                    </div>
+                    <div class="gallery-item" data-src="https://placehold.co/800x600/27ae60/FFFFFF?text=Printing+Sample+4">
+                        <img src="https://placehold.co/400x300/27ae60/FFFFFF?text=Printing+Sample+4" alt="Printing Sample 4">
+                    </div>
+                    <div class="gallery-item" data-src="https://placehold.co/800x600/8e44ad/FFFFFF?text=Printing+Sample+5">
+                        <img src="https://placehold.co/400x300/8e44ad/FFFFFF?text=Printing+Sample+5" alt="Printing Sample 5">
+                    </div>
+                    <div class="gallery-item" data-src="https://placehold.co/800x600/3498db/FFFFFF?text=Printing+Sample+6">
+                        <img src="https://placehold.co/400x300/3498db/FFFFFF?text=Printing+Sample+6" alt="Printing Sample 6">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Products Section -->
+        <section id="products" class="products">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Our Products</h2>
+                    <p>Browse our selection of printing products and packages</p>
+                </div>
+                
+                <div class="product-grid">
+                    <div class="product-card">
+                        <div class="product-img" style="background-image: url('https://placehold.co/600x400/1a5276/FFFFFF?text=A3+Calendar');"></div>
+                        <div class="product-content">
+                            <h3>A3 Calendar</h3>
+                            <p>Large format calendar perfect for office or home use.</p>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <div class="product-img" style="background-image: url('https://placehold.co/600x400/e74c3c/FFFFFF?text=Certificate+Set');"></div>
+                        <div class="product-content">
+                            <h3>Complete Certificate Set</h3>
+                            <p>Professional certificate printing for all occasions.</p>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <div class="product-img" style="background-image: url('https://placehold.co/600x400/f39c12/FFFFFF?text=Class+Photo');"></div>
+                        <div class="product-content">
+                            <h3>6x8 Class Photo</h3>
+                            <p>High-quality class photos to commemorate special moments.</p>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <div class="product-img" style="background-image: url('https://placehold.co/600x400/27ae60/FFFFFF?text=Key+Holder');"></div>
+                        <div class="product-content">
+                            <h3>Small Key Holder</h3>
+                            <p>Custom key holders with your photos or designs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Map Section -->
+        <section id="location" class="location">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Find Us</h2>
+                    <p>Visit our location in Turfloop Polokwane</p>
+                </div>
+                
+                <div id="map"></div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Lightbox -->
+    <div class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <div class="lightbox-content">
+            <img src="" alt="Lightbox Image">
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Turfloop Mankweng Polokwane Shopping Complex</p>
+                    <p>Email: info@theinkspot.co.za</p>
+                    <p>Phone: 083 778 1223 / 079 903 4210</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <a href="Index.html">Home</a>
+                    <a href="./pages/contact.html">Contact Us</a>
+                    <a href="./pages/product.html">Products</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Business Hours</h3>
+                    <p>Monday - Friday: 8:00 AM - 5:00 PM</p>
+                    <p>Saturday: 9:00 AM - 1:00 PM</p>
+                    <p>Sunday: Closed</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 The Ink Spot Printing & Ads. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // DOM Content Loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Accordion functionality
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const accordionItem = this.parentElement;
+                    const accordionContent = this.nextElementSibling;
+                    
+                    // Close all other accordion items
+                    document.querySelectorAll('.accordion-item').forEach(item => {
+                        if (item !== accordionItem) {
+                            item.classList.remove('active');
+                        }
+                    });
+                    
+                    // Toggle current accordion item
+                    accordionItem.classList.toggle('active');
+                });
+            });
+            
+            // Tabs functionality
+            const tabHeaders = document.querySelectorAll('.tab-header');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all headers and contents
+                    tabHeaders.forEach(h => h.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked header and corresponding content
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Gallery lightbox functionality
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            const lightbox = document.querySelector('.lightbox');
+            const lightboxImg = lightbox.querySelector('img');
+            const lightboxClose = lightbox.querySelector('.lightbox-close');
+            
+            galleryItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const imgSrc = this.getAttribute('data-src');
+                    lightboxImg.setAttribute('src', imgSrc);
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // Prevent scrolling
+                });
+            });
+            
+            // Close lightbox
+            lightboxClose.addEventListener('click', function() {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = ''; // Restore scrolling
+            });
+            
+            // Close lightbox when clicking outside the image
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) {
+                    lightbox.classList.remove('active');
+                    document.body.style.overflow = ''; // Restore scrolling
+                }
+            });
+            
+            // Search functionality
+            const searchBox = document.querySelector('.search-box');
+            const serviceCards = document.querySelectorAll('.service-card');
+            const productCards = document.querySelectorAll('.product-card');
+            
+            searchBox.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                // Search in services
+                serviceCards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Search in products
+                productCards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Initialize map
+            const map = L.map('map').setView([-23.885, 29.455], 13); // Coordinates for Polokwane area
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add marker for The Ink Spot location
+            L.marker([-23.885, 29.455]).addTo(map)
+                .bindPopup('The Ink Spot<br>Turfloop Mankweng Polokwane')
+                .openPopup();
+            
+            // Scroll animations
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            const fadeInOnScroll = function() {
+                fadeElements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const elementVisible = 150;
+                    
+                    if (elementTop < window.innerHeight - elementVisible) {
+                        element.classList.add('visible');
+                    }
+                });
+            };
+            
+            // Add fade-in class to elements that should animate
+            document.querySelectorAll('.service-card, .product-card, .about-text, .about-img').forEach(el => {
+                el.classList.add('fade-in');
+            });
+            
+            // Check scroll position on load and scroll
+            window.addEventListener('scroll', fadeInOnScroll);
+            fadeInOnScroll(); // Initial check
+            
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('nav a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.getAttribute('href').startsWith('#')) {
+                        e.preventDefault();
+                        const targetId = this.getAttribute('href').substring(1);
+                        const targetElement = document.getElementById(targetId);
+                        
+                        if (targetElement) {
+                            window.scrollTo({
+                                top: targetElement.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
